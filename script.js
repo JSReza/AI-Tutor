@@ -1,19 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const quizForm = document.getElementById('quizForm');
-    const quizContainer = document.getElementById('quizContainer');
-    const quizContent = document.getElementById('quizContent');
-    const loadingSpinner = document.getElementById('loadingSpinner');
+    const chatForm = document.getElementById('chat-form');
+    const messagesContainer = document.getElementById('messages');
+    const messageInput = document.getElementById('message');
 
-    quizForm.addEventListener('submit', async (e) => {
+    // Function to add a message to the chat
+    function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+        messageDiv.textContent = content;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Get form values
-        const topic = document.getElementById('topic').value;
-        const numberOfQuestions = document.getElementById('questionCount').value;
+        const message = messageInput.value.trim();
+        if (!message) return;
 
-        // Show loading spinner
-        loadingSpinner.classList.remove('hidden');
-        quizContainer.classList.add('hidden');
+        // Add user message to chat
+        addMessage(message, true);
+
+        // Clear input
+        messageInput.value = '';
 
         try {
             // Send request to server
@@ -23,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    topic,
-                    numberOfQuestions: parseInt(numberOfQuestions)
+                    topic: message,
+                    numberOfQuestions: 5
                 })
             });
 
@@ -32,17 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 // Display the quiz
-                quizContent.textContent = data.quiz;
-                quizContainer.classList.remove('hidden');
+                addMessage(data.quiz);
             } else {
-                alert('Failed to generate quiz. Please try again.');
+                addMessage('Sorry, I could not generate a quiz at this time. Please try again.');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred. Please try again later.');
-        } finally {
-            // Hide loading spinner
-            loadingSpinner.classList.add('hidden');
+            addMessage('An error occurred. Please try again later.');
         }
     });
 });

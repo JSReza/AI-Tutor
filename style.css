@@ -1,84 +1,104 @@
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
-    background-color: #f4f4f4;
-    padding: 20px;
+    background-color: #f0f2f5;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
 }
 
-.container {
+.app {
+    width: 100%;
     max-width: 800px;
-    margin: 0 auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
     background-color: white;
-    padding: 20px;
-    border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
     text-align: center;
-    color: #333;
-    margin-bottom: 20px;
+    padding: 1rem;
+    background-color: #007bff;
+    color: white;
+    margin: 0;
 }
 
-.form-group {
-    margin-bottom: 15px;
+.chat {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
-input[type="text"],
-input[type="number"] {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
+.message {
+    padding: 1rem;
+    border-radius: 1rem;
+    max-width: 80%;
+    white-space: pre-wrap;
+}
+
+.user-message {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.ai-message {
+    background-color: #e9ecef;
+    color: black;
+    align-self: flex-start;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.chat-form {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+textarea {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    resize: none;
+    font-family: inherit;
+    font-size: 1rem;
 }
 
 button {
-    display: block;
-    width: 100%;
-    padding: 10px;
+    padding: 0.5rem 1rem;
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 0.25rem;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-size: 1rem;
 }
 
 button:hover {
     background-color: #0056b3;
 }
 
-#quizContainer {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #ddd;
-}
-
-.hidden {
-    display: none;
-}
-
-#loadingSpinner {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-}
-
-#quizContent {
-    margin-top: 15px;
-    white-space: pre-wrap;
+button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
 }

@@ -8,10 +8,19 @@
 
 </head>
 <body>
-    <form>
-         <input>
-        <input type = "submit">
-    </form>
+ <main class="app">
+        <h1>AI Tutor</h1>
+
+        <section id="chat" class="chat">
+            <div id="messages" class="messages"></div>
+        </section>
+
+        <form id="chat-form" class="chat-form">
+            <textarea id="message" name="message" rows="2" required></textarea>
+            <button id="send" type="submit">Send</button>
+        </form>
+        
+    </main>
     <script src="script.js"></script>
 </body>
 </html>
