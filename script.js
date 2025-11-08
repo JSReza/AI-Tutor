@@ -1,48 +1,48 @@
-const form = document.getElementById('chat-form');
-const textarea = document.getElementById('message');
-const messagesDiv = document.getElementById('messages');
+document.addEventListener('DOMContentLoaded', () => {
+    const quizForm = document.getElementById('quizForm');
+    const quizContainer = document.getElementById('quizContainer');
+    const quizContent = document.getElementById('quizContent');
+    const loadingSpinner = document.getElementById('loadingSpinner');
 
-function addMessage(text, from = 'user') {
-  const el = document.createElement('div');
-  el.className = `message ${from}`;
-  el.textContent = text;
-  messagesDiv.appendChild(el);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
+    quizForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Get form values
+        const topic = document.getElementById('topic').value;
+        const numberOfQuestions = document.getElementById('questionCount').value;
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const msg = textarea.value.trim();
-  if (!msg) return;
+        // Show loading spinner
+        loadingSpinner.classList.remove('hidden');
+        quizContainer.classList.add('hidden');
 
-  addMessage(msg, 'user');
-  textarea.value = '';
+        try {
+            // Send request to server
+            const response = await fetch('/api/generate-quiz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    topic,
+                    numberOfQuestions: parseInt(numberOfQuestions)
+                })
+            });
 
-  // show a loading indicator
-  const loading = document.createElement('div');
-  loading.className = 'message bot loading';
-  loading.textContent = 'Thinking...';
-  messagesDiv.appendChild(loading);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            const data = await response.json();
 
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg })
+            if (data.success) {
+                // Display the quiz
+                quizContent.textContent = data.quiz;
+                quizContainer.classList.remove('hidden');
+            } else {
+                alert('Failed to generate quiz. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again later.');
+        } finally {
+            // Hide loading spinner
+            loadingSpinner.classList.add('hidden');
+        }
     });
-
-    const data = await res.json();
-    loading.remove();
-
-    if (!res.ok) {
-      addMessage(data.error || 'Error from server', 'bot');
-      return;
-    }
-
-    addMessage(data.reply, 'bot');
-  } catch (err) {
-    loading.remove();
-    addMessage('Network error: ' + err.message, 'bot');
-  }
 });

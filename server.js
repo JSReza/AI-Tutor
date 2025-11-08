@@ -1,51 +1,60 @@
-// Lightweight Express server that proxies requests to the OpenAI API.
-// Reads OPENAI_API_KEY from process.env and serves the static frontend.
+import express from 'express';
+import dotenv from 'dotenv';
+import { OpenAI } from 'openai';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-import express from "express";
-import dotenv from "dotenv";
-import OpenAI from "openai";
-import path from "path";
-
+// Load environment variables
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const apiKey = process.env.OPENAI_API_KEY;
-if (!apiKey) {
-  console.warn("Warning: OPENAI_API_KEY is not set. Set it in a .env file based on .env.example.");
-}
-
-const client = new OpenAI({ apiKey });
-
+// Middleware
 app.use(express.json());
+app.use(cors());
+app.use(express.static('.'));
 
-// Serve static files from project root so you can open http://localhost:3000
-app.use(express.static(path.resolve('.')));
-
-// Simple POST endpoint that accepts { message } and returns { reply }
-app.post('/api/chat', async (req, res) => {
-  try {
-    const { message } = req.body;
-    if (!message) return res.status(400).json({ error: 'Missing message in request body' });
-
-    const resp = await client.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: 'You are a helpful AI tutor.' },
-        { role: 'user', content: message }
-      ],
-      max_tokens: 800
-    });
-
-    const reply = resp.choices?.[0]?.message?.content ?? 'No reply from model';
-    res.json({ reply });
-  } catch (err) {
-    console.error('Error in /api/chat', err);
-    res.status(500).json({ error: String(err) });
-  }
+// Initialize OpenAI
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+// Generate quiz questions
+app.post('/api/generate-quiz', async (req, res) => {
+    try {
+        const { topic, numberOfQuestions = 5 } = req.body;
+
+        const prompt = `Create a practice quiz about ${topic} with ${numberOfQuestions} questions. 
+        Format each question with:
+        1. The question
+        2. Four multiple choice options (A, B, C, D)
+        3. The correct answer
+        
+        Make the questions challenging but appropriate for a student learning this topic.`;
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+        });
+
+        res.json({ 
+            success: true, 
+            quiz: completion.choices[0].message.content 
+        });
+    } catch (error) {
+        console.error('Error generating quiz:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to generate quiz' 
+        });
+    }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
